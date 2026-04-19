@@ -1,0 +1,10 @@
+app_name: ERP System
+version: 1.0.0
+debug: true
+
+database:
+  url: postgresql://erp_user:erp_password@localhost:5432/erp_db
+
+app:
+  secret_key: change-this-in-production-use-strong-random-key
+  jwt_secret_key: jwt-secret-key-change-in-production

@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales - ERP System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">ERP System</a>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="index.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="procurement.html"><i class="fas fa-shopping-cart"></i> Procurement</a></li>
+                    <li class="nav-item"><a class="nav-link" href="goods_receiving.html"><i class="fas fa-truck"></i> Goods Receiving</a></li>
+                    <li class="nav-item"><a class="nav-link" href="production.html"><i class="fas fa-industry"></i> Production</a></li>
+                    <li class="nav-item"><a class="nav-link" href="packaging.html"><i class="fas fa-box"></i> Packaging</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="sales.html"><i class="fas fa-chart-line"></i> Sales</a></li>
+                    <li class="nav-item"><a class="nav-link" href="financial.html"><i class="fas fa-dollar-sign"></i> Financial</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h2>Sales Management</h2>
+        <ul class="nav nav-tabs mt-3" role="tablist">
+            <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#customers">Customers</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#sales-orders">Sales Orders</button></li>
+            <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#invoices">Invoices</button></li>
+        </ul>
+
+        <div class="tab-content mt-3">
+            <div class="tab-pane fade show active" id="customers">
+                <div class="card">
+                    <div class="card-header">Customers</div>
+                    <div class="card-body">
+                        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#custModal">Add Customer</button>
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="custTable">
+                                <thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="sales-orders">
+                <div class="card">
+                    <div class="card-header">Sales Orders</div>
+                    <div class="card-body">
+                        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#soModal">Create Sales Order</button>
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="soTable">
+                                <thead><tr><th>Order #</th><th>Customer</th><th>Date</th><th>Total</th><th>Status</th><th>Actions</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tab-pane fade" id="invoices">
+                <div class="card">
+                    <div class="card-header">Invoices</div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="invTable">
+                                <thead><tr><th>Invoice #</th><th>SO #</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
+                                <tbody></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/pages/sales.js"></script>
+</body>
+</html>

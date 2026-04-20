@@ -1,35 +1,32 @@
-import os
-import yaml
-from datetime import timedelta
+from pydantic_settings import BaseSettings
 
-with open('config.yaml', 'r') as f:
-    config = yaml.safe_load(f)
 
-class Config:
-    SECRET_KEY = os.environ.get('SECRET_KEY') or config['app']['secret_key']
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or config['database']['url']
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-    JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY') or config['app']['jwt_secret_key']
-    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=24)
-    FLASK_ENV = os.environ.get('FLASK_ENV') or 'development'
-    DEBUG = config['app'].get('debug', False)
+class Settings(BaseSettings):
+    APP_NAME: str = "Scholarship Payment Platform"
+    VERSION: str = "1.0.0"
+    ENVIRONMENT: str = "development"
 
-class DevelopmentConfig(Config):
-    DEBUG = True
+    DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/scholarship_platform"
 
-class ProductionConfig(Config):
-    DEBUG = False
+    PAYSTACK_SECRET_KEY: str = ""
+    PAYSTACK_PUBLIC_KEY: str = ""
+    PAYSTACK_WEBHOOK_SECRET: str = ""
 
-class TestingConfig(Config):
-    TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
+    FLUTTERWAVE_SECRET_KEY: str = ""
+    FLUTTERWAVE_PUBLIC_KEY: str = ""
+    FLUTTERWAVE_WEBHOOK_SECRET: str = ""
 
-config_map = {
-    'development': DevelopmentConfig,
-    'production': ProductionConfig,
-    'testing': TestingConfig
-}
+    INTERAC_API_KEY: str = ""
 
-def get_config():
-    env = os.environ.get('FLASK_ENV') or 'development'
-    return config_map.get(env, DevelopmentConfig)
+    SENDGRID_API_KEY: str = ""
+
+    TWILIO_ACCOUNT_SID: str = ""
+    TWILIO_AUTH_TOKEN: str = ""
+    TWILIO_PHONE_NUMBER: str = ""
+
+    class Config:
+        env_file = ".env"
+        case_sensitive = True
+
+
+settings = Settings()

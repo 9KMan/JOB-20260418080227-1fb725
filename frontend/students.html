@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Students - Scholarship Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html"><i class="fas fa-graduation-cap"></i> Scholarship Platform</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="schools.html"><i class="fas fa-school"></i> Schools</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="students.html"><i class="fas fa-user-graduate"></i> Students</a></li>
+                    <li class="nav-item"><a class="nav-link" href="guardians.html"><i class="fas fa-users"></i> Guardians</a></li>
+                    <li class="nav-item"><a class="nav-link" href="agents.html"><i class="fas fa-user-tie"></i> Agents</a></li>
+                    <li class="nav-item"><a class="nav-link" href="scholarships.html"><i class="fas fa-award"></i> Scholarships</a></li>
+                    <li class="nav-item"><a class="nav-link" href="payments.html"><i class="fas fa-credit-card"></i> Payments</a></li>
+                    <li class="nav-item"><a class="nav-link" href="donate.html"><i class="fas fa-donate"></i> Donate</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row mb-3">
+            <div class="col-md-8">
+                <h2><i class="fas fa-user-graduate"></i> Students</h2>
+            </div>
+            <div class="col-md-4 text-end">
+                <button class="btn btn-primary" onclick="showCreateModal()">
+                    <i class="fas fa-plus"></i> Add Student
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>School</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTable"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="createModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Student</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">School ID</label>
+                        <input type="number" class="form-control" id="studentSchoolId" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="studentFirstName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="studentLastName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" id="studentEmail">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Phone</label>
+                        <input type="text" class="form-control" id="studentPhone">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="createStudent()">Create</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        async function loadStudents() {
+            const response = await fetch('/students');
+            const students = await response.json();
+            const tbody = document.getElementById('studentsTable');
+            tbody.innerHTML = students.map(s => `
+                <tr>
+                    <td>${s.id}</td>
+                    <td>${s.first_name} ${s.last_name}</td>
+                    <td>School #${s.school_id || '-'}</td>
+                    <td>${s.email || '-'}</td>
+                    <td>${s.phone || '-'}</td>
+                    <td>${new Date(s.created_at).toLocaleDateString()}</td>
+                </tr>
+            `).join('');
+        }
+
+        function showCreateModal() {
+            new bootstrap.Modal(document.getElementById('createModal')).show();
+        }
+
+        async function createStudent() {
+            const data = {
+                school_id: parseInt(document.getElementById('studentSchoolId').value),
+                first_name: document.getElementById('studentFirstName').value,
+                last_name: document.getElementById('studentLastName').value,
+                email: document.getElementById('studentEmail').value,
+                phone: document.getElementById('studentPhone').value
+            };
+            await fetch('/students', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+            bootstrap.Modal.getInstance(document.getElementById('createModal')).hide();
+            loadStudents();
+        }
+
+        loadStudents();
+    </script>
+</body>
+</html>

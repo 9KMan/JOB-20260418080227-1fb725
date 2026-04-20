@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scholarship Sponsorship Platform</title>
+    <title>Dashboard - Scholarship Platform</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="css/styles.css" rel="stylesheet">
@@ -11,13 +11,10 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#"><i class="fas fa-graduation-cap"></i> Scholarship Platform</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
+            <a class="navbar-brand" href="index.html"><i class="fas fa-graduation-cap"></i> Scholarship Platform</a>
+            <div class="collapse navbar-collapse">
                 <ul class="navbar-nav me-auto">
-                    <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
                     <li class="nav-item"><a class="nav-link" href="schools.html"><i class="fas fa-school"></i> Schools</a></li>
                     <li class="nav-item"><a class="nav-link" href="students.html"><i class="fas fa-user-graduate"></i> Students</a></li>
                     <li class="nav-item"><a class="nav-link" href="guardians.html"><i class="fas fa-users"></i> Guardians</a></li>
@@ -25,9 +22,6 @@
                     <li class="nav-item"><a class="nav-link" href="scholarships.html"><i class="fas fa-award"></i> Scholarships</a></li>
                     <li class="nav-item"><a class="nav-link" href="payments.html"><i class="fas fa-credit-card"></i> Payments</a></li>
                     <li class="nav-item"><a class="nav-link" href="donate.html"><i class="fas fa-donate"></i> Donate</a></li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item"><a class="nav-link" href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
                 </ul>
             </div>
         </div>
@@ -45,7 +39,7 @@
                 <div class="card bg-primary text-white">
                     <div class="card-body">
                         <h5 class="card-title"><i class="fas fa-school"></i> Schools</h5>
-                        <p class="card-text display-4" id="schoolCount">0</p>
+                        <p class="card-text display-4" id="schoolCount">-</p>
                     </div>
                 </div>
             </div>
@@ -53,7 +47,7 @@
                 <div class="card bg-success text-white">
                     <div class="card-body">
                         <h5 class="card-title"><i class="fas fa-user-graduate"></i> Students</h5>
-                        <p class="card-text display-4" id="studentCount">0</p>
+                        <p class="card-text display-4" id="studentCount">-</p>
                     </div>
                 </div>
             </div>
@@ -61,7 +55,7 @@
                 <div class="card bg-info text-white">
                     <div class="card-body">
                         <h5 class="card-title"><i class="fas fa-award"></i> Scholarships</h5>
-                        <p class="card-text display-4" id="scholarshipCount">0</p>
+                        <p class="card-text display-4" id="scholarshipCount">-</p>
                     </div>
                 </div>
             </div>
@@ -93,11 +87,11 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-header bg-secondary text-white">
-                        <h5><i class="fas fa-history"></i> Recent Activity</h5>
+                        <h5><i class="fas fa-history"></i> Recent Payments</h5>
                     </div>
                     <div class="card-body">
-                        <ul class="list-group" id="recentActivity">
-                            <li class="list-group-item">No recent activity</li>
+                        <ul class="list-group" id="recentPayments">
+                            <li class="list-group-item">Loading...</li>
                         </ul>
                     </div>
                 </div>
@@ -107,7 +101,38 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/api.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/pages/dashboard.js"></script>
+    <script>
+        async function loadDashboard() {
+            try {
+                const [schools, students, scholarships, payments] = await Promise.all([
+                    fetch('/schools').then(r => r.json()),
+                    fetch('/students').then(r => r.json()),
+                    fetch('/scholarships').then(r => r.json()),
+                    fetch('/payments').then(r => r.json())
+                ]);
+
+                document.getElementById('schoolCount').textContent = schools.length;
+                document.getElementById('studentCount').textContent = students.length;
+                document.getElementById('scholarshipCount').textContent = scholarships.length;
+
+                const total = payments
+                    .filter(p => p.status === 'verified')
+                    .reduce((sum, p) => sum + parseFloat(p.amount), 0);
+                document.getElementById('totalRaised').textContent = '$' + total.toFixed(2);
+
+                const recentPayments = payments.slice(0, 5);
+                document.getElementById('recentPayments').innerHTML = recentPayments.length > 0
+                    ? recentPayments.map(p => `<li class="list-group-item">
+                        <i class="fas fa-credit-card"></i> ${p.currency || 'USD'} ${parseFloat(p.amount).toFixed(2)} -
+                        <span class="badge bg-${p.status === 'verified' ? 'success' : 'warning'}">${p.status}</span>
+                       </li>`).join('')
+                    : '<li class="list-group-item text-muted">No payments yet</li>';
+            } catch (err) {
+                console.error('Dashboard load error:', err);
+            }
+        }
+
+        loadDashboard();
+    </script>
 </body>
 </html>

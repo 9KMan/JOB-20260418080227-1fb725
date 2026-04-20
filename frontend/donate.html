@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Make a Donation - Scholarship Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="css/styles.css" rel="stylesheet">
+    <style>
+        .donation-card { max-width: 600px; margin: 0 auto; }
+        .provider-logo { height: 40px; margin-right: 10px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html"><i class="fas fa-graduation-cap"></i> Scholarship Platform</a>
+            <div class="collapse navbar-collapse">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item"><a class="nav-link" href="dashboard.html"><i class="fas fa-home"></i> Dashboard</a></li>
+                    <li class="nav-item"><a class="nav-link" href="schools.html"><i class="fas fa-school"></i> Schools</a></li>
+                    <li class="nav-item"><a class="nav-link" href="students.html"><i class="fas fa-user-graduate"></i> Students</a></li>
+                    <li class="nav-item"><a class="nav-link" href="scholarships.html"><i class="fas fa-award"></i> Scholarships</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="payments.html"><i class="fas fa-credit-card"></i> Payments</a></li>
+                    <li class="nav-item"><a class="nav-link" href="donate.html"><i class="fas fa-donate"></i> Donate</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="donation-card">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="fas fa-donate"></i> Make a Donation</h3>
+                </div>
+                <div class="card-body">
+                    <div id="alertMessage" class="alert d-none"></div>
+
+                    <form id="donationForm">
+                        <div class="mb-3">
+                            <label class="form-label">Scholarship ID (optional)</label>
+                            <input type="number" class="form-control" id="scholarshipId" placeholder="Enter scholarship ID to support a specific student">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Donor Email *</label>
+                            <input type="email" class="form-control" id="donorEmail" required placeholder="your@email.com">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Donation Amount (USD) *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" id="donationAmount" step="0.01" min="1" required placeholder="0.00">
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Currency</label>
+                            <select class="form-control" id="currency">
+                                <option value="USD">USD - US Dollar</option>
+                                <option value="NGN">NGN - Nigerian Naira</option>
+                                <option value="GHS">GHS - Ghanaian Cedi</option>
+                                <option value="KES">KES - Kenyan Shilling</option>
+                                <option value="ZAR">ZAR - South African Rand</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">Payment Provider</label>
+                            <div class="d-flex gap-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="provider" id="paystack" value="paystack" checked>
+                                    <label class="form-check-label" for="paystack">
+                                        <img src="https://paystack.com/favicon.ico" class="provider-logo"> Paystack
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="provider" id="flutterwave" value="flutterwave">
+                                    <label class="form-check-label" for="flutterwave">
+                                        <img src="https://flutterwave.com/favicon.ico" class="provider-logo"> Flutterwave
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-credit-card"></i> Proceed to Payment
+                        </button>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <div class="text-center text-muted">
+                        <p><i class="fas fa-lock"></i> Secure payment processing</p>
+                        <p class="small">Your donation goes directly to support students' education</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/api.js"></script>
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('scholarship')) {
+            document.getElementById('scholarshipId').value = params.get('scholarship');
+        }
+
+        document.getElementById('donationForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const alert = document.getElementById('alertMessage');
+            alert.className = 'alert alert-info';
+            alert.textContent = 'Initiating payment...';
+            alert.classList.remove('d-none');
+
+            const data = {
+                scholarship_id: document.getElementById('scholarshipId').value ? parseInt(document.getElementById('scholarshipId').value) : null,
+                donor_email: document.getElementById('donorEmail').value,
+                amount: parseFloat(document.getElementById('donationAmount').value),
+                currency: document.getElementById('currency').value,
+                payment_provider: document.querySelector('input[name="provider"]:checked').value
+            };
+
+            try {
+                const response = await fetch('/payments/initiate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert.className = 'alert alert-success';
+                    alert.innerHTML = `<i class="fas fa-check-circle"></i> Payment initiated! Reference: ${result.provider_reference}<br>Redirecting to payment page...`;
+                    if (result.authorization_url) {
+                        setTimeout(() => window.location.href = result.authorization_url, 2000);
+                    }
+                } else {
+                    alert.className = 'alert alert-danger';
+                    alert.textContent = 'Payment initiation failed: ' + result.detail;
+                }
+            } catch (err) {
+                alert.className = 'alert alert-danger';
+                alert.textContent = 'Error: ' + err.message;
+            }
+        });
+    </script>
+</body>
+</html>

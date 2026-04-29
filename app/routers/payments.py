@@ -3,18 +3,41 @@ from sqlalchemy.orm import Session
 from typing import List
 from datetime import datetime
 from app.database import get_db
-from app.models import Payment, Scholarship, Student
+from app.models import Payment, Scholarship, Student, School
 from app.schemas import PaymentCreate, PaymentInitiate, PaymentResponse, PaymentVerifyResponse
 from app.services.paystack import paystack_service
 from app.services.flutterwave import flutterwave_service
+from app.services.interac import interac_service
 from app.services.receipt import receipt_service
 
 router = APIRouter(prefix="/payments", tags=["payments"])
 
 
+async def _get_student_name(student: Student) -> str:
+    return student.name if student else "Unknown"
+
+
+async def _check_school_verified(db: Session, scholarship: Scholarship) -> None:
+    """Raise 403 if the school linked to scholarship is not verified."""
+    student = db.query(Student).filter(Student.id == scholarship.student_id).first()
+    if not student:
+        raise HTTPException(status_code=404, detail="Student not found")
+    school = db.query(School).filter(School.id == student.school_id).first()
+    if not school:
+        raise HTTPException(status_code=404, detail="School not found")
+    if school.verification_status != "verified":
+        raise HTTPException(status_code=403, detail="School not verified")
+
+
 @router.post("/initiate", response_model=PaymentResponse, status_code=status.HTTP_201_CREATED)
 async def initiate_payment(payment: PaymentInitiate, db: Session = Depends(get_db)):
+    if payment.scholarship_id:
+        scholarship = db.query(Scholarship).filter(Scholarship.id == payment.scholarship_id).first()
+        if scholarship:
+            await _check_school_verified(db, scholarship)
+
     provider = payment.payment_provider.lower() if payment.payment_provider else "paystack"
+    reference = None
 
     if provider == "paystack":
         result = await paystack_service.initiate_payment(
@@ -30,6 +53,13 @@ async def initiate_payment(payment: PaymentInitiate, db: Session = Depends(get_d
             metadata={"payment_type": "scholarship", "scholarship_id": payment.scholarship_id}
         )
         reference = result.get("data", {}).get("tx_ref")
+    elif provider == "interac":
+        result = await interac_service.initiate_transfer(
+            amount=float(payment.amount),
+            email=payment.donor_email or "donor@example.com",
+            metadata={"payment_type": "scholarship", "scholarship_id": payment.scholarship_id}
+        )
+        reference = result.get("transfer_id") or result.get("id") or str(payment.scholarship_id)
     else:
         raise HTTPException(status_code=400, detail="Invalid payment provider")
 
@@ -131,7 +161,7 @@ async def generate_receipt(payment_id: int, db: Session = Depends(get_db)):
         if scholarship:
             student = db.query(Student).filter(Student.id == scholarship.student_id).first()
             if student:
-                student_name = f"{student.first_name} {student.last_name}"
+                student_name = student.name
 
     pdf_bytes = receipt_service.generate_receipt(
         donor_name=payment.donor_email or "Anonymous",

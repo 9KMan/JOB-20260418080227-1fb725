@@ -63,12 +63,60 @@ async def paystack_webhook(
     return {"status": "received"}
 
 
+@router.post("/interac")
+async def interac_webhook(
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    data = await request.json()
+    transfer_id = data.get("transfer_id") or data.get("transferId")
+    status_val = data.get("status")
+
+    if transfer_id:
+        payment = db.query(Payment).filter(Payment.provider_reference == transfer_id).first()
+
+        if status_val in ["completed", "success", "received"]:
+            if payment:
+                payment.status = "verified"
+                payment.verified_at = datetime.utcnow()
+                db.commit()
+
+                if payment.scholarship_id:
+                    scholarship = db.query(Scholarship).filter(Scholarship.id == payment.scholarship_id).first()
+                    if scholarship:
+                        total_paid = sum(p.amount for p in scholarship.payments if p.status == "verified")
+                        if total_paid >= scholarship.total_amount:
+                            scholarship.status = "fully_funded"
+                        elif total_paid > 0:
+                            scholarship.status = "partially_funded"
+                        db.commit()
+
+                        notification_service.notify_payment_received(
+                            db, "student", scholarship.student_id,
+                            payment.donor_email, float(payment.amount), payment.currency
+                        )
+            return {"status": "success"}
+        elif status_val in ["failed", "cancelled", "declined"]:
+            if payment:
+                payment.status = "failed"
+                db.commit()
+            return {"status": "failed"}
+
+    return {"status": "received"}
+
+
 @router.post("/flutterwave")
 async def flutterwave_webhook(
     request: Request,
     db: Session = Depends(get_db),
-    http_auth: Optional[str] = Header(None)
+    verif_hash: Optional[str] = Header(None)
 ):
+    payload = await request.body()
+
+    if verif_hash:
+        if not flutterwave_service.verify_webhook_signature(payload, verif_hash):
+            raise HTTPException(status_code=400, detail="Invalid signature")
+
     data = await request.json()
     event = data.get("event")
     event_data = data.get("data", {})

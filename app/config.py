@@ -5,6 +5,7 @@ class Settings(BaseSettings):
     APP_NAME: str = "Scholarship Payment Platform"
     VERSION: str = "1.0.0"
     ENVIRONMENT: str = "development"
+    JWT_SECRET_KEY: str = "changeme-super-secret-jwt-key-change-in-production"
 
     DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/scholarship_platform"
 

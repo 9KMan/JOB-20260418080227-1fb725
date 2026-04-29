@@ -18,11 +18,8 @@ def create_guardian(guardian: GuardianCreate, db: Session = Depends(get_db)):
 
 
 @router.get("", response_model=List[GuardianResponse])
-def list_guardians(skip: int = 0, limit: int = 100, student_id: int = None, db: Session = Depends(get_db)):
-    query = db.query(Guardian)
-    if student_id:
-        query = query.filter(Guardian.student_id == student_id)
-    guardians = query.offset(skip).limit(limit).all()
+def list_guardians(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    guardians = db.query(Guardian).offset(skip).limit(limit).all()
     return guardians
 
 

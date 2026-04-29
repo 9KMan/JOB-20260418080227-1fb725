@@ -33,11 +33,9 @@ class SchoolResponse(SchoolBase):
 
 class StudentBase(BaseModel):
     school_id: int
-    first_name: str
-    last_name: str
+    guardian_id: Optional[int] = None
+    name: str
     email: Optional[str] = None
-    phone: Optional[str] = None
-    date_of_birth: Optional[datetime] = None
 
 
 class StudentCreate(StudentBase):
@@ -45,10 +43,8 @@ class StudentCreate(StudentBase):
 
 
 class StudentUpdate(BaseModel):
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
+    name: Optional[str] = None
     email: Optional[str] = None
-    phone: Optional[str] = None
 
 
 class StudentResponse(StudentBase):
@@ -60,9 +56,7 @@ class StudentResponse(StudentBase):
 
 
 class GuardianBase(BaseModel):
-    student_id: int
-    first_name: str
-    last_name: str
+    name: str
     email: Optional[str] = None
     phone: Optional[str] = None
     relationship_type: Optional[str] = None
@@ -73,8 +67,7 @@ class GuardianCreate(GuardianBase):
 
 
 class GuardianUpdate(BaseModel):
-    first_name: Optional[str] = None
-    last_name: Optional[str] = None
+    name: Optional[str] = None
     email: Optional[str] = None
     phone: Optional[str] = None
     relationship_type: Optional[str] = None
@@ -187,3 +180,30 @@ class PaymentVerifyResponse(BaseModel):
     amount: Decimal
     currency: str
     provider_reference: str
+
+
+class UserCreate(BaseModel):
+    username: str
+    email: str
+    password: str
+
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+
+class UserResponse(BaseModel):
+    id: int
+    username: str
+    email: str
+    is_active: bool
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    user: UserResponse

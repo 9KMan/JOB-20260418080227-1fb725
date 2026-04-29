@@ -9,8 +9,7 @@ def test_create_scholarship(client):
 
     student_response = client.post("/students", json={
         "school_id": school_id,
-        "first_name": "John",
-        "last_name": "Doe"
+        "name": "John Doe"
     })
     student_id = student_response.json()["id"]
 
@@ -37,8 +36,7 @@ def test_list_scholarships(client):
 
     student_response = client.post("/students", json={
         "school_id": school_id,
-        "first_name": "John",
-        "last_name": "Doe"
+        "name": "John Doe"
     })
     student_id = student_response.json()["id"]
 
@@ -64,8 +62,7 @@ def test_get_scholarship(client):
 
     student_response = client.post("/students", json={
         "school_id": school_id,
-        "first_name": "John",
-        "last_name": "Doe"
+        "name": "John Doe"
     })
     student_id = student_response.json()["id"]
 
@@ -87,8 +84,7 @@ def test_update_scholarship_status(client):
 
     student_response = client.post("/students", json={
         "school_id": school_id,
-        "first_name": "John",
-        "last_name": "Doe"
+        "name": "John Doe"
     })
     student_id = student_response.json()["id"]
 

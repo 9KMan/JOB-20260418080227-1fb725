@@ -23,15 +23,13 @@ class Student(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     school_id = Column(Integer, ForeignKey("schools.id"))
-    first_name = Column(String(100), nullable=False)
-    last_name = Column(String(100), nullable=False)
+    guardian_id = Column(Integer, ForeignKey("guardians.id"), nullable=True)
+    name = Column(String(255), nullable=False)
     email = Column(String(255))
-    phone = Column(String(50))
-    date_of_birth = Column(Date, nullable=True)
     created_at = Column(TIMESTAMP, server_default=func.now())
 
     school = relationship("School", back_populates="students")
-    guardians = relationship("Guardian", back_populates="student")
+    guardian = relationship("Guardian", back_populates="students")
     agent_students = relationship("AgentStudent", back_populates="student")
     scholarships = relationship("Scholarship", back_populates="student")
 
@@ -40,15 +38,13 @@ class Guardian(Base):
     __tablename__ = "guardians"
 
     id = Column(Integer, primary_key=True, index=True)
-    student_id = Column(Integer, ForeignKey("students.id"))
-    first_name = Column(String(100), nullable=False)
-    last_name = Column(String(100), nullable=False)
+    name = Column(String(255), nullable=False)
     email = Column(String(255))
     phone = Column(String(50))
     relationship_type = Column(String(50))
     created_at = Column(TIMESTAMP, server_default=func.now())
 
-    student = relationship("Student", back_populates="guardians")
+    students = relationship("Student", back_populates="guardian")
 
 
 class Agent(Base):
@@ -118,3 +114,24 @@ class Notification(Base):
     message = Column(Text)
     is_read = Column(Boolean, default=False)
     created_at = Column(TIMESTAMP, server_default=func.now())
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String(100), unique=True, nullable=False)
+    email = Column(String(255), unique=True, nullable=False)
+    hashed_password = Column(String(255), nullable=False)
+    is_active = Column(Boolean, default=True)
+    created_at = Column(TIMESTAMP, server_default=func.now())
+
+    def set_password(self, password: str):
+        from passlib.context import CryptContext
+        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        self.hashed_password = pwd_context.hash(password)
+
+    def check_password(self, password: str) -> bool:
+        from passlib.context import CryptContext
+        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        return pwd_context.verify(password, self.hashed_password)

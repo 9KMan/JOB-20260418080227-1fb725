@@ -45,14 +45,12 @@ def test_update_agent(client):
 
 
 def test_assign_student_to_agent(client):
-    # Create school, student, and agent
     school_response = client.post("/schools", json={"name": "Test School", "email": "school@test.com"})
     school_id = school_response.json()["id"]
 
     student_response = client.post("/students", json={
         "school_id": school_id,
-        "first_name": "John",
-        "last_name": "Doe"
+        "name": "John Doe"
     })
     student_id = student_response.json()["id"]
 

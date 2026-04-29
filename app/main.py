@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import init_db
-from app.routers import schools, students, guardians, agents, scholarships, payments, webhooks
+from app.routers import schools, students, guardians, agents, scholarships, payments, webhooks, auth
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -25,6 +25,7 @@ app.include_router(agents.router)
 app.include_router(scholarships.router)
 app.include_router(payments.router)
 app.include_router(webhooks.router)
+app.include_router(auth.router)
 
 
 @app.on_event("startup")

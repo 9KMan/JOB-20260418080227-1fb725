@@ -1,9 +1,9 @@
-app_name: ERP System
+app_name: Scholarship Payment Platform
 version: 1.0.0
 debug: true
 
 database:
-  url: postgresql://erp_user:erp_password@localhost:5432/erp_db
+  url: postgresql://postgres:postgres@localhost:5432/scholarship_platform
 
 app:
   secret_key: change-this-in-production-use-strong-random-key

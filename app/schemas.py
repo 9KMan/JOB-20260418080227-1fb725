@@ -65,7 +65,7 @@ class GuardianBase(BaseModel):
     last_name: str
     email: Optional[str] = None
     phone: Optional[str] = None
-    relationship: Optional[str] = None
+    relationship_type: Optional[str] = None
 
 
 class GuardianCreate(GuardianBase):
@@ -77,7 +77,7 @@ class GuardianUpdate(BaseModel):
     last_name: Optional[str] = None
     email: Optional[str] = None
     phone: Optional[str] = None
-    relationship: Optional[str] = None
+    relationship_type: Optional[str] = None
 
 
 class GuardianResponse(GuardianBase):

@@ -45,7 +45,7 @@ class Guardian(Base):
     last_name = Column(String(100), nullable=False)
     email = Column(String(255))
     phone = Column(String(50))
-    relationship = Column(String(50))
+    relationship_type = Column(String(50))
     created_at = Column(TIMESTAMP, server_default=func.now())
 
     student = relationship("Student", back_populates="guardians")
